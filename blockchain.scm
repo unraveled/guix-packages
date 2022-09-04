@@ -35,15 +35,16 @@
     (native-inputs
      `(("git" ,git)
        ("doxygen" ,doxygen)
+       ("clang" ,clang-9)
        ("pkg-config" ,pkg-config)
        ("curl" ,curl)))
     (inputs
      `(("gmp" ,gmp)
-       ("clang" ,clang-9)
        ("openssl" ,openssl)
        ("python" ,python-3)))
     (arguments
      `(#:build-type "Release"
+       ;; Note: the WABT dependency only compiles udner clang 9
        #:configure-flags '("-DCMAKE_CXX_COMPILER=clang++"
                            "-DCMAKE_C_COMPILER=clang"
                            "-DCMAKE_C_COMPILER_ID=Clang")
