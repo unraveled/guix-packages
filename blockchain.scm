@@ -1,4 +1,8 @@
-(define-module (blockchain))
+(define-module (blockchain)
+  #:use-module (nonguix build-system binary)
+  #:use-module (gnu packages gcc)
+  #:use-module (gnu packages base)
+  #:use-module (gnu packages linux))
 
 (use-modules
  (guix packages)
@@ -135,3 +139,30 @@ facilitate smart contract development for the EOSIO platform.")
     "Leap is blockchain node software and supporting tools that
 implements the Antelope protocol.")
    (license license:expat)))
+
+(define-public solana
+  (package
+    (name "solana")
+    (version "1.10.38")
+    (source (origin
+              (method url-fetch)
+              (uri (string-append "https://github.com/solana-labs/solana/releases/download/v" version "/solana-release-x86_64-unknown-linux-gnu.tar.bz2"))
+              (sha256
+               (base32
+                "077fbmyg6a3448vkalkn4xfx73vk0sgisp24pyd1ri5hdyvw0da3"))))
+    (arguments
+     `(#:patchelf-plan
+       `(("bin/solana" ("glibc" "gcc:lib" "eudev"))
+         ("bin/spl-token" ("glibc" "gcc:lib" "eudev")))
+       #:install-plan
+       `(("bin/solana" "bin/")
+         ("bin/spl-token" "bin/"))))
+    (inputs
+     `(("gcc:lib" ,gcc "lib")
+       ("glibc" ,glibc)
+       ("eudev" ,eudev)))
+    (build-system binary-build-system)
+    (home-page "https://solana.com/")
+    (synopsis "Blockchain, Rebuilt for Scale")
+    (description "Blockchain, Rebuilt for Scale")
+    (license license:asl2.0)))
