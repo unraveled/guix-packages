@@ -26,6 +26,10 @@
      `(("unzip" ,unzip)))
     (build-system binary-build-system)
     (home-page "https://www.terraform.io")
-    (synopsis "Automate infrastructure on any cloud")
-    (description "Terraform enables you to safely and predictably create, change, and improve infrastructure. It is an open source tool that codifies APIs into declarative configuration files that can be shared amongst team members, treated as code, edited, reviewed, and versioned.")
+    (synopsis "A tool for building, changing, and versioning
+infrastructure safely and efficiently.")
+    (description "Terraform enables you to safely and predictably create, change, and
+improve infrastructure. It is an open source tool that codifies APIs
+into declarative configuration files that can be shared amongst team
+members, treated as code, edited, reviewed, and versioned.")
     (license license:mpl2.0)))
