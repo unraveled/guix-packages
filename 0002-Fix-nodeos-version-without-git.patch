@@ -1,0 +1,17 @@
+diff --git a/libraries/version/CMakeLists.txt b/libraries/version/CMakeLists.txt
+index 239c479..c8ecb8a 100755
+--- a/libraries/version/CMakeLists.txt
++++ b/libraries/version/CMakeLists.txt
+@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.5)
+ project(Version)
+ 
+ # Define the version metadata by default, in case `git` cannot be found.
+-set(_VERSION_MAJOR_  "unknown")
+-set(_VERSION_MINOR_  "")
+-set(_VERSION_PATCH_  "")
++set(_VERSION_MAJOR_  ${VERSION_MAJOR})
++set(_VERSION_MINOR_  ${VERSION_MINOR})
++set(_VERSION_PATCH_  ${VERSION_PATCH})
+ set(_VERSION_SUFFIX_ "")
+ set(_VERSION_HASH_   "")
+ set(_VERSION_DIRTY_  "")

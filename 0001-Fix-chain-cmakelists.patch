@@ -1,0 +1,29 @@
+From 5ec9701c1660b8d9dab55790eedf4685d3337c07 Mon Sep 17 00:00:00 2001
+From: Jesse Eisses <jesse.eisses@gmail.com>
+Date: Mon, 5 Sep 2022 10:21:16 +0200
+Subject: [PATCH] Fix chain cmakelists
+
+---
+ libraries/chain/CMakeLists.txt | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/libraries/chain/CMakeLists.txt b/libraries/chain/CMakeLists.txt
+index d2b1c3bff..115f40a69 100644
+--- a/libraries/chain/CMakeLists.txt
++++ b/libraries/chain/CMakeLists.txt
+@@ -126,6 +126,12 @@ add_library( eosio_chain
+              )
+ 
+ target_link_libraries( eosio_chain PUBLIC fc chainbase Logging IR WAST WASM Runtime
++                       LLVMTransformUtils
++                       LLVMExecutionEngine
++                       LLVMObject
++                       LLVMInstCombine
++                       LLVMScalarOpts
++                       LLVMMC
+                        softfloat builtins ${CHAIN_EOSVM_LIBRARIES} ${LLVM_LIBS} ${CHAIN_RT_LINKAGE}
+                      )
+ target_include_directories( eosio_chain
+-- 
+2.37.2
+
