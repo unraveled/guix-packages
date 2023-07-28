@@ -149,23 +149,30 @@ C/C++ development of contracts for Antelope blockchains")
 implements the Antelope protocol.")
    (license license:expat)))
 
-(define-public solana
+(define-public solana-1.13
   (package
     (name "solana")
-    (version "1.10.38")
+    (version "1.13.6")
     (source (origin
               (method url-fetch)
               (uri (string-append "https://github.com/solana-labs/solana/releases/download/v" version "/solana-release-x86_64-unknown-linux-gnu.tar.bz2"))
               (sha256
                (base32
-                "077fbmyg6a3448vkalkn4xfx73vk0sgisp24pyd1ri5hdyvw0da3"))))
+                "0403ihaqd6q3vxilqapp8zjiqxyldjzppkglhxjg7hq9ak2nhsik"))))
     (arguments
      `(#:patchelf-plan
        `(("bin/solana" ("glibc" "gcc:lib" "eudev"))
-         ("bin/spl-token" ("glibc" "gcc:lib" "eudev")))
+         ("bin/spl-token" ("glibc" "gcc:lib" "eudev"))
+         ("bin/solana-keygen" ("glibc" "gcc:lib" "eudev")))
        #:install-plan
        `(("bin/solana" "bin/")
-         ("bin/spl-token" "bin/"))))
+         ("bin/spl-token" "bin/")
+         ("bin/solana-keygen" "bin/")
+         ;; ("bin/cargo-build-sbf" "bin/")
+         ;; ("bin/cargo-build-bpf" "bin/")
+         ;; ("bin/cargo-test-sbf" "bin/")
+         ;; ("bin/cargo-test-bpf" "bin/")
+         )))
     (inputs
      `(("gcc:lib" ,gcc "lib")
        ("glibc" ,glibc)
@@ -175,3 +182,14 @@ implements the Antelope protocol.")
     (synopsis "Blockchain, Rebuilt for Scale")
     (description "Blockchain, Rebuilt for Scale")
     (license license:asl2.0)))
+
+;; (define-public solana
+;;   (package (inherit solana)
+;;     (name "solana")
+;;     (version "1.14.7")
+;;     (source (origin
+;;               (method url-fetch)
+;;               (uri (string-append "https://github.com/solana-labs/solana/releases/download/v" version "/solana-release-x86_64-unknown-linux-gnu.tar.bz2"))
+;;               (sha256
+;;                (base32
+;;                 "077fbmyg6a3448vkalkn4xfx73vk0sgisp24pyd1ri5hdyvw0da3"))))))
