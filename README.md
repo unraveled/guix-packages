@@ -17,3 +17,7 @@ them upstream, but until then they can be used from this channel.
 - kubectl (binary)
 - k9s (binary)
 - terraform (binary)
+
+## Built from source
+
+- Soju
