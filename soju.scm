@@ -13,7 +13,10 @@
   #:use-module (gnu packages gcc)
   #:use-module (gnu packages glib)
   #:use-module (gnu packages golang)
+  #:use-module (gnu packages golang-build)
   #:use-module (gnu packages golang-check)
+  #:use-module (gnu packages golang-crypto)
+  #:use-module (gnu packages golang-xyz)
   #:use-module (gnu packages linux)  
   #:use-module (gnu packages man)
   #:use-module (gnu packages syncthing))
@@ -55,15 +58,13 @@
                           (install-file "soju" bin-dir)
                           (install-file "sojudb" bin-dir)
                           (install-file "sojuctl" bin-dir)
-                          (substitute* "config.in"
-                            ((".*")
-                             ""))
+			  ;; the default config file is not useful so we empty it for now 
+                          (substitute* "config.in" ((".*") ""))
                           (mkdir-p conf-dir)
                           (copy-file "config.in"
-                                     (string-append conf-dir "/config"))))))
+                                     (string-append conf-dr "/config"))))))
                   (add-before 'build 'set-flags
                     (lambda _
-                      ;; Make sure CMake picks Clang as compiler
                       (begin
                         (setenv "CGO_LDFLAGS"
                          "-Wl,--unresolved-symbols=ignore-in-object-files") #t))))))
@@ -93,7 +94,7 @@
     (home-page "https://git.sr.ht/~emersion/soju")
     (synopsis "User-friendly IRC bouncer") ;
     (description
-     "soju connects to upstream IRC servers on behalf of the user to provide
+     "Connects to upstream IRC servers on behalf of the user to provide
 extra functionality. soju supports many features
 such as multiple users, numerous @@url{https://ircv3.net/,IRCv3} extensions,
 chat history playback and detached channels.  It is well-suited for both small
@@ -116,11 +117,10 @@ and large deployments.")
     (build-system go-build-system)
     (arguments
      (list
-      ;; #:go go-1.19
       #:tests? #f ;requires additional dependencies like `wasmbrowsertest`
       #:import-path "nhooyr.io/websocket"))
     (home-page "https://nhooyr.io/websocket")
-    (synopsis "websocket")
+    (synopsis "Minimal and idiomatic WebSocket library for Go")
     (description
      "Package websocket implements the
 @@url{https://rfc-editor.org/rfc/rfc6455.html,RFC 6455} @code{WebSocket}
@@ -146,11 +146,10 @@ protocol.")
       #:go go-1.18
       #:import-path "github.com/pires/go-proxyproto"))
     (home-page "https://github.com/pires/go-proxyproto")
-    (synopsis "go-proxyproto")
+    (synopsis "Implementation of the PROXY protocol")
     (description
      "Package proxyproto implements Proxy Protocol (v1 and v2) parser and writer, as
-per specification:
-@@url{https://www.haproxy.org/download/2.3/doc/proxy-protocol.txt,https://www.haproxy.org/download/2.3/doc/proxy-protocol.txt}")
+per specification: @@url{https://www.haproxy.org/download/2.3/doc/proxy-protocol.txt}")
     (license license:asl2.0)))
 
 (define-public go-github-com-msteinert-pam
@@ -225,7 +224,7 @@ per specification:
     (synopsis "jwt-go")
     (description
      "Package jwt is a Go implementation of JSON Web Tokens:
-@@url{http://self-issued.info/docs/draft-jones-json-web-token.html,http://self-issued.info/docs/draft-jones-json-web-token.html}")
+@@url{http://self-issued.info/docs/draft-jones-json-web-token.html}")
     (license license:expat)))
 
 (define-public go-git-sr-ht--sircmpwn-go-bare
@@ -276,15 +275,18 @@ per specification:
                       (begin
                         (setenv "CGO_LDFLAGS"
                          "-Wl,--unresolved-symbols=ignore-in-object-files") #t))))))
-    (propagated-inputs `(("go-github-com-mattn-go-sqlite3" ,go-github-com-mattn-go-sqlite3)))
+    (propagated-inputs
+     `(("go-github-com-mattn-go-sqlite3" ,go-github-com-mattn-go-sqlite3)))
     (home-page "https://git.sr.ht/~emersion/go-sqlite3-fts5")
-    (synopsis "go-sqlite3-fts5")
+    (synopsis "Standalone FTS5 extension for go-sqlite3")
     (description "Standalone FTS5 extension for
 @@url{https://github.com/mattn/go-sqlite3,go-sqlite3}.")
     (license license:expat)))
 
+;; put this below the irc-v3 package
 (define-public go-gopkg-in-irc-v4
-  (package
+  (package 
+    (inherit go-gopkg-in-irc-v3)
     (name "go-gopkg-in-irc-v4")
     (version "4.0.0")
     (source
@@ -302,13 +304,10 @@ per specification:
       #:tests? #f
       #:import-path "gopkg.in/irc.v4"
       #:unpack-path "gopkg.in/irc.v4"))
-    (propagated-inputs `(("go-gopkg-in-yaml-v2" ,go-gopkg-in-yaml-v2)
-                         ("go-golang-org-x-time" ,go-golang-org-x-time)
-                         ("go-github-com-stretchr-testify" ,go-github-com-stretchr-testify)))
-    (home-page "https://gopkg.in/irc.v4")
-    (synopsis "go-irc")
-    (description "nolint")
-    (license license:expat)))
+    (propagated-inputs
+     `(("go-gopkg-in-yaml-v2" ,go-gopkg-in-yaml-v2)
+       ("go-golang-org-x-time" ,go-golang-org-x-time)
+       ("go-github-com-stretchr-testify" ,go-github-com-stretchr-testify)))))
 
 (define-public go-github-com-prometheus-client-golang-soju
   (package
@@ -364,7 +363,7 @@ server tools for Prometheus metrics.")
                   (delete 'build))))
     (propagated-inputs (list go-github-com-golang-protobuf-proto
                         go-github-com-matttproud-golang-protobuf-extensions-pbutil-soju
-                        go-github-com-prometheus-client-model-soju))
+                        go-github-com-prometheus-client-model-v0.5))
     (synopsis "Prometheus metrics")
     (description "This package provides tools for reading and writing
 Prometheus metrics.")
@@ -398,6 +397,21 @@ extensions for the Go language, namely support for record length-delimited
 message streaming.")
     (home-page "https://github.com/matttproud/golang_protobuf_extensions")
     (license license:asl2.0)))
+
+(define-public go-github-com-prometheus-client-model-v0.5
+  (package
+    (inherit go-github-com-prometheus-client-model)
+    (name "go-github-com-prometheus-client-model-v0.5")
+    (version "0.5.0")
+    (source
+     (origin
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://github.com/prometheus/client_model")
+             (commit (string-append "v" version))))
+       (file-name (git-file-name name version))
+       (sha256
+        (base32 "1pl9i969jx5vkhm8vd5vb8yrifv37aw6h8mjg04820pw0ygfbigy"))))))
 
 (define-public go-github-com-prometheus-client-model-soju
   (package
