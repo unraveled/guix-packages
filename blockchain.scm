@@ -7,6 +7,7 @@
 (use-modules
  (guix packages)
  (guix download)
+ (guix gexp)
  (guix build-system gnu)
  ((guix licenses) :prefix license:)
  (gnu packages gawk)
@@ -16,6 +17,8 @@
  (gnu packages)
  (gnu packages multiprecision)
  (gnu packages tls)
+ (gnu packages compression)
+ (gnu packages commencement)
  (gnu packages python)
  (gnu packages version-control)
  (gnu packages documentation)
@@ -29,7 +32,7 @@
 (define-public antelope-cdt
   (package
    (name "antelope-cdt")
-   (version "4.0.0")
+   (version "3.1.0")
    (source
     (origin
      (method git-fetch)
@@ -38,7 +41,7 @@
                          (recursive? #t)))
      (sha256
       (base32
-       "119019gjp8cdb63mlgaxgbhq2yin5w66gfr7vpq80n95ff7m76n9"))
+       "0mmyfncvjb18ld7dj8mzp1ia6iqfy2gq9hq7r1m5p8c3ymidfnrv"))
      (file-name (git-file-name name version))))
    (build-system cmake-build-system)
    (native-inputs
@@ -54,9 +57,9 @@
    (arguments
     `(#:build-type "Release"
       ;; Note: the WABT dependency only compiles under clang 9
-      #:configure-flags '("-DCMAKE_CXX_COMPILER=clang++"
-                          "-DCMAKE_C_COMPILER=clang"
-                          "-DCMAKE_C_COMPILER_ID=Clang")
+      ;; #:configure-flags '("-DCMAKE_CXX_COMPILER=clang++"
+      ;;                     "-DCMAKE_C_COMPILER=clang"
+      ;;                     "-DCMAKE_C_COMPILER_ID=Clang")
       ;; there is 1 test failing:
       ;; /tmp/guix-build-eosio-cdt-1.8.1.drv-0/build/tools/toolchain-tester/toolchain-tester: line 4: /usr/bin/env: No such file or directory
       ;; this should be patched
@@ -68,13 +71,13 @@
          (lambda _
            ;; Make sure CMake picks Clang as compiler
            (begin
-             (setenv "CXX" "clang++")
-             (setenv "CC" "clang")
+             ;; (setenv "CXX" "clang++")
+             ;; (setenv "CC" "clang")
              #t)))
        (add-after 'unpack 'remove-building-of-tests
          (lambda _
-           (substitute* "CMakeLists.txt" (("include\\(modules/TestsExternalProject.txt\\)")
-                                          ""))
+           ;; (substitute* "CMakeLists.txt" (("include\\(modules/TestsExternalProject.txt\\)")
+           ;;                                ""))
            #t)))))
    (home-page "https://github.com/AntelopeIO/cdt")
    (synopsis "Suite of tools used to build contracts for Antelope blockchains")
@@ -89,22 +92,21 @@ C/C++ development of contracts for Antelope blockchains")
    (version "1.70.0")
    (name "boost-for-eosio")
    (arguments
-    (substitute-keyword-arguments
-     (package-arguments boost)
-     ((#:make-flags flags)
-      `(append
-        (cons "link=static" (delete "link=shared" ,flags))
-        '("--with-iostreams" "--with-date_time"
-          "--with-filesystem" "--with-system"
-          "--with-program_options" "--with-chrono" "--with-test")))
-     ((#:phases phases)
-      `(modify-phases ,phases
-                      (delete 'provide-libboost_python)))))))
+    (substitute-keyword-arguments (package-arguments boost)
+      ((#:make-flags flags)
+       #~(append
+          (cons "link=static" (delete "link=shared" #$flags))	 
+          '("--with-iostreams" "--with-date_time"
+            "--with-filesystem" "--with-system"
+            "--with-program_options" "--with-chrono" "--with-test")))
+      ((#:phases phases)
+       #~(modify-phases #$phases
+           (delete 'provide-libboost_python)))))))
 
 (define-public leap
   (package
    (name "leap")
-   (version "3.1.0")
+   (version "5.0.2")
    (source
     (origin
      (method git-fetch)
@@ -113,7 +115,7 @@ C/C++ development of contracts for Antelope blockchains")
                          (recursive? #t)))
      (sha256
       (base32
-       "102m765y9183w9az70s5mpwqjj3ch1469vdf1mk5wa3wbjn4dn18"))
+       "0rwznqrgw9bifdy5nypc468gkjzxaqgcnh36xhairvp28nqip40a"))
      (file-name (git-file-name name version))
      (patches (search-patches
                ;;"eosio-fix-build-problem-for-git-abscence.patch"
@@ -127,20 +129,27 @@ C/C++ development of contracts for Antelope blockchains")
       ("pkg-config" ,pkg-config)
       ("curl" ,curl)
       ("python" ,python-3)
+      ("zlib" ,zlib)
       ("graphviz" ,graphviz)
-      ("clang" ,clang-11)
       ("libusb" ,libusb)))
    (inputs
     `(("boost" ,boost-for-eosio)
-      ("llvm-7" ,llvm-7)
+      ("llvm" ,llvm-11)
+      ("gcc-toolchain" ,gcc-toolchain-11)
       ("gmp" ,gmp)
       ("openssl" ,openssl)))
    (arguments
-    `(#:configure-flags
-      '("-DCMAKE_BUILD_TYPE='Release'"
-        "-DCMAKE_CXX_COMPILER='clang++'"
-        "-DCMAKE_C_COMPILER='clang'")
+    (list
+     #:configure-flags
+     #~(list
+	"-DCMAKE_BUILD_TYPE='Release'"
+	"-DCMAKE_CXX_COMPILER='g++'"
+	"-DCMAKE_C_COMPILER='gcc'")
       #:build-type "Release"
+      ;; limit the concurrency because of OOM compmiler crahses:
+      ;; https://github.com/AntelopeIO/cdt?tab=readme-ov-file#build-cdt
+      #:make-flags #~(list "-j" (number->string (min 2 (parallel-job-count))))
+      #:parallel-build? #t
       #:tests? #f))
    (home-page "https://antelope.io")
    (synopsis " C++ implementation of the Antelope protocol.")
