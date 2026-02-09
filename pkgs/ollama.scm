@@ -40,6 +40,13 @@
 	(base32
 	 "09v89p6gz290aclxkdldncxmr8rjl1r0ppacwly183jlgd1awjff"))))
     (build-system binary-build-system)
+    ;; we are giving oup on the patchelf plan for shared libraries
+    ;; (too much). so LD_LIBRARY_PATH must be populared for dynamic
+    ;; linking
+    (native-search-paths
+     (list (search-path-specification
+	     (variable "LD_LIBRARY_PATH")
+	     (files '("lib")))))
     (arguments
      (list
       #:phases
@@ -66,17 +73,18 @@
       #:patchelf-plan
       #~(let ((libs (find-files "../lib" ".*\\.so(\\.[0-9]+)*$")))
 	  `(("ollama" ("gcc-toolchain"))))
-      #:validate-runpath? #f
+      #:validate-runpath? #f      ; lots of .so files really hard to patchelf link
       #:install-plan
       #~`(("ollama" "bin/ollama")
 	  ("../lib" "lib")
 	  )))
-    (inputs (list gcc-toolchain))
+    (inputs (list
+	     gcc-toolchain
+	     xz
+	     `(,zstd "lib")
+	     bzip2))
     (native-inputs
-     (list tar
-	   zstd
-	   ))
-
+     (list tar))
     (home-page "https://ollama.ai")
     (synopsis "Run large language models locally")
     (description
