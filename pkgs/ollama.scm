@@ -76,13 +76,12 @@
       #:validate-runpath? #f      ; lots of .so files really hard to patchelf link
       #:install-plan
       #~`(("ollama" "bin/ollama")
-	  ("../lib" "lib")
-	  )))
+	  ("../lib" "lib"))))
     (inputs (list
 	     gcc-toolchain
 	     xz
-	     `(,zstd "lib")
-	     bzip2))
+	     `(,zstd "lib")))
+    (propagated-inputs (list bzip2))
     (native-inputs
      (list tar))
     (home-page "https://ollama.ai")
