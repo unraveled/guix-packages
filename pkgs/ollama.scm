@@ -78,10 +78,10 @@
       #~`(("ollama" "bin/ollama")
 	  ("../lib" "lib"))))
     (inputs (list
-	     gcc-toolchain
-	     xz
-	     `(,zstd "lib")))
-    (propagated-inputs (list bzip2))
+	     gcc-toolchain))
+    (propagated-inputs (list bzip2
+			     xz
+			     `(,zstd "lib")))
     (native-inputs
      (list tar))
     (home-page "https://ollama.ai")
