@@ -81,6 +81,7 @@
 	     gcc-toolchain))
     (propagated-inputs (list bzip2
 			     xz
+			     zlib
 			     `(,zstd "lib")))
     (native-inputs
      (list tar))
